@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-//const config = require('config');
-//const jwt = require('jsonwebtoken');
+const config = require('config');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const gravatar = require('gravatar');
 const { check, validationResult } = require('express-validator');
 const User = require('../../models/User');
 
-//const jwtSecret = config.get('jwtSecret');
+const jwtSecret = config.get('jwtSecret');
 //@desc   Register user
 //@req    POST /api/users
 //access  Public
@@ -29,8 +29,8 @@ router.post(
         }),
     ],
     async (req, res) => {
-        console.log(req.body);
-        console.log("Test");
+        //   console.log(req.body);
+        //   console.log("Test");
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -60,23 +60,23 @@ router.post(
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(password, salt);
             await user.save();
-            //Return JWT since in the UI I want user to login imediet alfter registration
-            // const payload = {
-            //     user: {
-            //         id: user.id,
-            //     },
-            // };
-            // jwt.sign(
-            //     payload,
-            //     jwtSecret,
-            //     {
-            //         expiresIn: 360000,
-            //     },
-            //     (err, token) => {
-            //         if (err) throw err;
-            //         res.json({ token });
-            //     }
-            // );
+            //Return JWT since in the UI I want user to login alfter registration
+            const payload = {
+                user: {
+                    id: user.id,
+                },
+            };
+            jwt.sign(
+                payload,
+                jwtSecret,
+                {
+                    expiresIn: 360000,
+                },
+                (err, token) => {
+                    if (err) throw err;
+                    res.json({ token });
+                }
+            );
         } catch (error) {
             res.status(500).json({ msg: 'Server error' });
         }
